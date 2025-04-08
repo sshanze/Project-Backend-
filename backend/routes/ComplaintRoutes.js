@@ -1,16 +1,18 @@
 import express from 'express';
 
-import { fileComplaint, resolveComplaint, trackComplaint } from '../controllers/complaint.controller.js';
+import { fileComplaint, trackComplaint } from '../controllers/complaint.controller.js';
+import { protectRoute } from './../middleware/protectRoute.js';
+import { validateComplaint } from './../middleware/validationMiddleware.js';
 
 const router = express.Router();
 
 // File a Complaint
-router.post('/file',fileComplaint );
+router.post('/fileComplaint',protectRoute(["Student"]),validateComplaint,fileComplaint );
 
 // Track Complaints
 router.get('/track/:userId',trackComplaint );
 
-// Resolve Complaint
-router.post('/resolve/:complaintId', resolveComplaint);
+
+
 
 export default router;
