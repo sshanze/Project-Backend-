@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddCategory = () => {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [facultyId, setFacultyId] = useState("");
@@ -9,35 +11,57 @@ const AddCategory = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch Faculty List from Backend
   useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/faculty") // API to get faculty members
-      .then((response) => {
+    const fetchFacultyList = async () => {
+      try {
+        const adminToken = localStorage.getItem("admin_token");
+
+        if (!adminToken) {
+          setError("Authentication failed. Please log in again.");
+          return;
+        }
+
+        const response = await axios.get(
+          "http://localhost:5000/api/admin/adminAuthority/facultyList",
+          { headers: { Authorization: `Bearer ${adminToken}` } }
+        );
+
         setFacultyList(response.data);
-      })
-      .catch((err) => console.error("Error fetching faculty:", err));
+      } catch (err) {
+        setError("Error fetching faculty: " + (err.response?.data?.error || err.message));
+      }
+    };
+
+    fetchFacultyList();
   }, []);
 
-  // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/categories", {
-        name,
-        description,
-        facultyId,
-      });
+      const adminToken = localStorage.getItem("admin_token");
+
+      if (!adminToken) {
+        setError("Authentication failed. Please log in again.");
+        setLoading(false);
+        return;
+      }
+
+      await axios.post(
+        "http://localhost:5000/api/admin/adminAuthority/add-categories",
+        { name, description, facultyId },
+        { headers: { Authorization: `Bearer ${adminToken}` } }
+      );
 
       alert("Category Added Successfully!");
       setName("");
       setDescription("");
       setFacultyId("");
+      navigate("/admin-dashboard");
     } catch (err) {
-      setError("Error adding category. Try again.");
+      setError("Error adding category: " + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -47,11 +71,8 @@ const AddCategory = () => {
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">Add New Category</h2>
-
         {error && <p className="text-red-500 text-sm">{error}</p>}
-
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          {/* Category Name */}
           <div>
             <label className="block text-gray-700">Category Name</label>
             <input
@@ -62,8 +83,6 @@ const AddCategory = () => {
               className="w-full px-3 py-2 border rounded-lg"
             />
           </div>
-
-          {/* Description */}
           <div>
             <label className="block text-gray-700">Description</label>
             <textarea
@@ -72,8 +91,6 @@ const AddCategory = () => {
               className="w-full px-3 py-2 border rounded-lg"
             ></textarea>
           </div>
-
-          {/* Faculty Selection */}
           <div>
             <label className="block text-gray-700">Assign Faculty</label>
             <select
@@ -85,13 +102,11 @@ const AddCategory = () => {
               <option value="">Select Faculty</option>
               {facultyList.map((faculty) => (
                 <option key={faculty._id} value={faculty._id}>
-                  {faculty.name}
+                  {faculty.name} - {faculty.department}
                 </option>
               ))}
             </select>
           </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700"

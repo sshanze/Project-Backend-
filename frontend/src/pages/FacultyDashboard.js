@@ -1,100 +1,103 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Outlet } from "react-router-dom";
+import logo from "../assets/logo.jpg";
 
 const FacultyDashboard = () => {
   const navigate = useNavigate();
   const [faculty, setFaculty] = useState(null);
-  const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const token = localStorage.getItem("faculty_token");
 
-  // Fetch faculty details and complaints from the backend
   useEffect(() => {
-    Promise.all([
-      fetch("http://localhost:5000/api/faculty-details"), // Fetch faculty info
-      fetch("http://localhost:5000/api/faculty-complaints"), // Fetch complaints
-    ])
-      .then(([facultyRes, complaintsRes]) => {
-        if (!facultyRes.ok || !complaintsRes.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        return Promise.all([facultyRes.json(), complaintsRes.json()]);
+    if (!token) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    fetch("http://localhost:5000/api/faculty/faculty-details", {
+      headers: { "Authorization": `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch faculty details");
+        return res.json();
       })
-      .then(([facultyData, complaintsData]) => {
-        setFaculty(facultyData);
-        setComplaints(complaintsData);
+      .then((data) => {
+        //console.log("Faculty Data:", data);
+        setFaculty(data);
         setLoading(false);
       })
       .catch((err) => {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("faculty_token");
+    navigate("/", { replace: true });
+  };
+
+  const CustomButton = ({ label, onClick, color }) => (
+    <button
+      className={`${color} text-white px-4 py-2 rounded-lg font-bold hover:opacity-80 transition`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
 
   return (
-    <div className="min-h-screen flex bg-[#04395E] text-white">
-      {/* Sidebar */}
-      <div className="w-1/4 bg-[#032D47] p-6 flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-4">Faculty Panel</h2>
-        {faculty ? (
-          <div className="text-center">
-            <p className="text-lg font-semibold">{faculty.name}</p>
-            <p className="text-sm text-gray-300">{faculty.department}</p>
+    <div className="flex flex-col md:flex-row h-screen">
+      <div className="w-full md:w-2/6 bg-blue-900 text-white p-6 flex flex-col items-center">
+        <img src={logo} alt="Faculty Logo" className="w-24 h-24 mb-4 rounded-full" />
+        <h1 className="text-xl font-bold">Faculty Dashboard</h1>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : faculty ? (
+          <div className="mt-4 text-center w-full">
+            <label className="text-gray-300 block">Faculty Name:</label>
+            <input
+              type="text"
+              value={faculty.name || "N/A"}
+              readOnly
+              className="w-full bg-white text-black p-2 rounded-md mt-1 text-center"
+            />
+            <label className="text-gray-300 block mt-2">Department:</label>
+            <input
+              type="text"
+              value={faculty.department || "N/A"}
+              readOnly
+              className="w-full bg-white text-black p-2 rounded-md mt-1 text-center"
+            />
           </div>
         ) : (
-          <p>Loading faculty info...</p>
+          <p className="text-red-500">Faculty Data Not Found</p>
         )}
-        <button
-          className="mt-6 bg-white text-gray-900 px-6 py-2 rounded-lg"
-          onClick={() => navigate("/faculty/FacultyProfile")}
-        >
-          Profile
-        </button>
+
+        <div className="mt-6 w-full flex flex-col gap-4">
+          {faculty && faculty._id ? (
+            <CustomButton
+              label="Profile"
+              onClick={() => navigate(`/faculty-dashboard/facultyprofile/${faculty._id}`)}
+              color="bg-purple-500"
+            />
+          ) : (
+            <p className="text-red-500">Faculty ID Not Found</p>
+          )}
+          <CustomButton
+            label="Manage Complaints"
+            onClick={() => navigate("/faculty-dashboard/manage-complaints")}
+            color="bg-green-500"
+          />
+          <CustomButton label="Logout" onClick={handleLogout} color="bg-red-500" />
+        </div>
       </div>
-
-      {/* Main Content */}
-      <div className="w-3/4 p-6">
-        <h1 className="text-center text-3xl font-bold mb-6">Faculty Dashboard</h1>
-
-        {/* Show loading or error messages */}
-        {loading && <p className="text-center text-lg">Loading complaints...</p>}
-        {error && <p className="text-center text-red-500">{error}</p>}
-
-        {/* Complaints Table */}
-        {!loading && !error && complaints.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-white">
-              <thead>
-                <tr className="bg-[#04395E]">
-                  <th className="border p-2">Complaint ID</th>
-                  <th className="border p-2">Email</th>
-                  <th className="border p-2">Complaint Name</th>
-                  <th className="border p-2">Category</th>
-                  <th className="border p-2">Title</th>
-                  <th className="border p-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {complaints.map((complaint) => (
-                  <tr
-                    key={complaint.id}
-                    className="bg-gray-800 hover:bg-gray-600 cursor-pointer"
-                    onClick={() => navigate(`/faculty-dashboard/complaint/${complaint.id}`)}
-                  >
-                    <td className="border p-2">{complaint.id}</td>
-                    <td className="border p-2">{complaint.email}</td>
-                    <td className="border p-2">{complaint.name}</td>
-                    <td className="border p-2">{complaint.category}</td>
-                    <td className="border p-2">{complaint.title}</td>
-                    <td className="border p-2">{complaint.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          !loading && <p className="text-center">No complaints assigned yet.</p>
-        )}
+      <div className="w-full md:w-3/4 bg-white p-6">
+        <Outlet />
       </div>
     </div>
   );

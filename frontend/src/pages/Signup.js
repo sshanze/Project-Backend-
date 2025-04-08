@@ -25,7 +25,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    console.log("Form Data being sent:", formData);
+    //console.log("Form Data being sent:", formData);
     // Validate email domain
     if (!formData.email.endsWith("@pucit.edu.pk")) {
       setError("Email must end with @pucit.edu.pk");
@@ -134,24 +134,20 @@ const Signup = () => {
               <option value="Computer Science">Computer Science</option>
               <option value="Information Technology">Information Technology</option>
               <option value="Software Engineering">Software Engineering</option>
+              <option value="Data Science">Data Science</option>
             </select>
           </div>
 
-          {/* Role Selection */}
           <div>
-            <label className="text-white block text-sm mb-1">Role</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 rounded-md bg-white text-gray-700 border-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Student">Student</option>
-              <option value="Faculty">Faculty</option>
-              <option value="Admin">Admin</option>
-            </select>
-          </div>
+  <label className="text-white block text-sm mb-1">Role</label>
+  <input
+    type="text"
+    name="role"
+    value={formData.role} // Keeps "Student" as default
+    readOnly
+    className="w-full px-3 py-2 rounded-md bg-gray-300 text-gray-700 border-none focus:ring-2 focus:ring-blue-500 cursor-not-allowed"
+  />
+</div>
 
           {/* Password Input */}
           <div>

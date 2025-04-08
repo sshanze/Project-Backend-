@@ -1,6 +1,6 @@
 // src/pages/LoginPage.js
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import logo from "../assets/logo.jpg";
 
@@ -17,13 +17,16 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post("http://localhost:5000/api/users/login", { email, password });
-console.log(response.data);
+      //console.log(response.data);
+
       if (response.data.success) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
         const { role } = response.data.user;
+        const tokenKey = role.toLowerCase() + "_token"; // Generates 'student_token', 'faculty_token', 'admin_token'
+
+        localStorage.setItem(tokenKey, response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
         if (role === "Student") {
-          console.log("Navigating to Student Dashboard...");
           navigate("/student-dashboard");
         } else if (role === "Faculty") {
           navigate("/faculty-dashboard");
@@ -84,9 +87,9 @@ console.log(response.data);
             </span>
           </div>
 
-          <p className="text-sm text-white text-center cursor-pointer hover:underline">
+          <Link to="/forgot-password" className="text-sm text-white text-center block hover:underline">
             Forgot Password?
-          </p>
+          </Link>
 
           <button
             type="submit"

@@ -12,7 +12,7 @@ const ChangePassword = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetch(`http://localhost:5000/api/users/${id}/change-password`, {
+    fetch(`http://localhost:5000/api/users/change-password/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(passwords),
@@ -20,7 +20,7 @@ const ChangePassword = () => {
       .then((res) => res.json())
       .then(() => {
         alert("Password Updated!");
-        navigate(`/profile/${id}`);
+        navigate(`/student-dashboard`);
       })
       .catch((err) => alert("Error updating password"));
   };

@@ -12,6 +12,12 @@ import ChangePassword from "./pages/ChangePassword";
 import AdminDashboard from "./pages/AdminDashboard";
 import AddCategory from "./pages/AddCategory";
 import AddFaculty from "./pages/AddFaculty";
+import CategoryFacultyManagement from "./pages/CategoryFacutlyManagement";
+import UpdateCategory from "./pages/UpdateCategory";
+import AdminProfile from "./pages/AdminProfile";
+import ManageComplaints from "./pages/ManageComplaint";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 
 const App = () => {
@@ -20,6 +26,9 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
         
         {/* Student Dashboard Routes */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
@@ -27,21 +36,26 @@ const App = () => {
           <Route path="complaint-status" element={<ComplaintStatus />} />
           <Route path="profile" element={<StudentProfile />} />
         </Route>
-
-        <Route path="/change-password" element={<ChangePassword />} />
+ 
+        <Route path="/change-password/:id" element={<ChangePassword />} />
         
+        <Route path="/faculty-dashboard" element={<FacultyDashboard />}>
+          <Route path="manage-complaints" element={<ManageComplaints />} />
+          <Route path="facultyprofile/:id" element={<FacultyProfile />} />
+        </Route>
 
-        {/* Faculty Dashboard Route */}
-        <Route path="/faculty-dashboard" element={<FacultyDashboard />} />
-        <Route path="/faculty/:id" element={<FacultyProfile/>} />
-
+        
 
         {/* Admin Dashboard Route */}
         <Route path="/admin-dashboard" element={<AdminDashboard />}>
           <Route path="add-category" element={<AddCategory />} />
           <Route path="add-faculty" element={<AddFaculty />} />
+          <Route path="category-faculty-management" element={<CategoryFacultyManagement />} />
+          <Route path="admin-profile" element={<AdminProfile />} />
+
         </Route>
-        
+        <Route path="/admin-dashboard/category-faculty/update-categories/:id" element={<UpdateCategory />} />
+       
       </Routes>
     </Router>
   );

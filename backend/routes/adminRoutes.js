@@ -1,10 +1,11 @@
 // adminRoutes.js
 import express from 'express';
-import { addFaculty, updateFaculty, deleteFaculty } from '../controllers/admin.controller.js';
-import { addCategory, updateCategory, deleteCategory } from '../controllers/category.controller.js';
+import { addFaculty, updateFaculty, deleteFaculty, facultyList, adminInfo, AdminChangePassword, AdminUpdateProfile } from '../controllers/admin.controller.js';
+import { addCategory, updateCategory, deleteCategory, categoryFacultyList, findCategory, getCategoryById } from '../controllers/category.controller.js';
 import { protectRoute } from '../middleware/protectRoute.js';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import { getCategories } from '../controllers/user.controller.js';
 
 const router = express.Router();
 
@@ -42,13 +43,28 @@ router.post("/addAdmin", protectRoute(['Admin']), async (req, res) => {
 
 
 // Admin can add, update, and delete faculty
-router.post('/faculty', protectRoute(['Admin']), addFaculty);
-router.put('/faculty/:id', protectRoute(['Admin']), updateFaculty);
-router.delete('/faculty/:id', protectRoute(['Admin']), deleteFaculty);
+router.get('/facultyList', protectRoute(['Admin']), facultyList);
+router.post('/add-faculty', protectRoute(['Admin']), addFaculty);
+router.put('/update-faculty/:id', protectRoute(['Admin']), updateFaculty);
+router.delete('/delete-faculty/:id', protectRoute(['Admin']), deleteFaculty);
 
 // Admin can add, update, and delete categories
-router.post('/category', protectRoute(['Admin']), addCategory);
-router.put('/category/:id', protectRoute(['Admin']), updateCategory);
-router.delete('/category/:id', protectRoute(['Admin']), deleteCategory);
+router.get('/category-faculty-list', protectRoute(['Admin']), categoryFacultyList);
+
+router.get('/categories',protectRoute(['Admin']),getCategories);
+router.get('/find-categories', protectRoute(['Admin']),findCategory );
+
+
+router.get("/category/:id", getCategoryById);
+
+router.post('/add-categories', protectRoute(['Admin']), addCategory);
+router.put('/update-categories/:id', protectRoute(['Admin']), updateCategory);
+router.delete('/delete-categories/:id', protectRoute(['Admin']), deleteCategory);
+router.get("/admin-info", protectRoute(['Admin']), adminInfo);
+router.put("/admin-change-password", protectRoute(['Admin']), AdminChangePassword);
+router.put("/admin-update-profile", protectRoute(['Admin']),AdminUpdateProfile );
+
+
+
 
 export default router;

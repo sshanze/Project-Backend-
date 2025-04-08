@@ -1,24 +1,41 @@
 
-import Notification from '../models/Notification.js';
+
+import nodemailer from "nodemailer";
+import { ENV_VARS } from '../config/envVars.js';
 
 
+export async function sendNotification(req, res) {
+    const { userId, message, email } = req.body;
 
-export async function sendNotification(req,res)
-{
-        const { userId, message } = req.body;
-      
-        try {
-          const notification = new Notification({
-            userId,
-            message,
-          });
-          await notification.save();
-          res.status(201).json({ message: 'Notification sent successfully', notification });
-        } catch (error) {
-          res.status(400).json({ error: error.message });
-        }
-      
+    try {
+        // 1️⃣ Send real-time notification via Socket.IO
+        req.io.emit("newNotification", { userId, message });
+
+        // 2️⃣ Send Email Notification
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: ENV_VARS.EMAIL_USER,  // ✅ Env se value le rahe hain
+                pass: ENV_VARS.EMAIL_PASS,  // ✅ Env se value le rahe hain
+            },
+        });
+
+        const mailOptions = {
+            from: ENV_VARS.EMAIL_USER,
+            to: email,
+            subject: "New Notification",
+            text: message,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: "Notification sent successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 }
+
+
 
 export async function getNotification(req, res)  {
     const { userId } = req.params;
