@@ -2,11 +2,11 @@
   "name": "ocms",
   "version": "1.0.0",
   "main": "index.js",
-  "scripts": {
-    "dev": "node --watch backend/Server.js",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "node  backend/Server.js"
-  },
+ "scripts": {
+  "dev": "node Server.js",
+  "start": "node Server.js",
+  "build": "npm run build --prefix ../frontend"
+},
   "keywords": [],
   "author": "",
   "type": "module",
